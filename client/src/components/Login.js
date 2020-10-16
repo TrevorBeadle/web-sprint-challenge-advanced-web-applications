@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { axiosWithAuth } from "../utils/axiosWithAuth";
 
 const Login = () => {
@@ -7,19 +8,25 @@ const Login = () => {
   const [values, setValues] = useState({
     credentials: { username: "", password: "" },
   });
+  const history = useHistory();
 
   const login = e => {
     e.preventDefault();
     axiosWithAuth()
-      .post("/api/login")
-      .then(res => console.log(res))
+      .post("/api/login", values.credentials)
+      .then(res => {
+        localStorage.setItem("token", res.data.payload);
+        history.push("/colors");
+      })
       .catch(err => console.log(err));
   };
 
   const onChange = e => {
     setValues({
-      ...values,
-      [e.target.name]: e.target.value,
+      credentials: {
+        ...values.credentials,
+        [e.target.name]: e.target.value,
+      },
     });
   };
 
@@ -38,12 +45,14 @@ const Login = () => {
 
         <label htmlFor="password">Password</label>
         <input
-          type="text"
+          type="password"
           id="password"
           name="password"
           value={values.credentials.password}
           onChange={onChange}
         />
+
+        <button>Login</button>
       </form>
     </>
   );
